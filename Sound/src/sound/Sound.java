@@ -17,10 +17,18 @@ public class Sound {
 	static final String APIKEY = "4b4874393877384755546a4a7a5a7575306c55576972496d566866304f414755353537756e524538557337";
 
 	public static void main(String[] args) {
-		playSound("ペットボトルのような資源ごみは火曜日になります");
+		String msg = "ペットボトルのような資源ごみは火曜日になります";
+		String person = "seiji";//"nozomi"、"seiji"、"akari"、"anzu"、"hiroshi"、"kaho"、 "koutarou"、"maki"、"nanako"、"osamu"、"sumire"
+		if(args.length > 0){
+			msg = args[0];
+		}
+		if(args.length > 1){
+			person = args[1];
+		}
+		playSound(msg, person);
 	}
 
-	public static void playSound(String text) {
+	public static void playSound(String text, String person) {
 		// 音声文字列ＳＳＭＬ
 		AiTalkSsml ssml;
 		// 音声ＰＣＭリニアデータ
@@ -33,7 +41,7 @@ public class Sound {
 			// せいじさんの音声で、文字列を、ＳＳＭＬクラスに登録する
 			AiTalkTextToSpeech search = new AiTalkTextToSpeech();
 			ssml = new AiTalkSsml();
-			ssml.startVoice("seiji");
+			ssml.startVoice(person);
 			ssml.startProsody(0.8f, 1.2f, 1.2f, 1.0f);
 			ssml.addText(text);
 			ssml.endProsody();

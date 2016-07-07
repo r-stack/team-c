@@ -15,6 +15,23 @@ def tag_images_in_directory(path, api):
   return api.tag_images(images)
 
 
+
+def check_pretty(imageurl):
+    api = ClarifaiApi()
+    #api.set_model("")
+    if imageurl.startswith('http'):
+        response = api.tag_image_urls(imageurl, select_classes="pretty,human")
+    elif os.path.isdir(imageurl):
+        response = tag_images_in_directory(imageurl)
+    elif os.path.isfile(imageurl):
+        with open(imageurl,'rb') as image_file:
+            response = api.tag(image_file, select_classes="pretty,human,man,woman")
+    else:
+        raise Exception("Must input url, directory path, or file path")
+    
+    print json.dumps(response, indent=2)
+    return response
+
 def main(argv):
   if len(argv) > 1:
     imageurl = argv[1]
@@ -29,11 +46,12 @@ def main(argv):
     response = tag_images_in_directory(imageurl)
   elif os.path.isfile(imageurl):
     with open(imageurl,'rb') as image_file:
-      response = api.tag(image_file, select_classes="pretty")
+      response = api.tag(image_file, select_classes="pretty,man,woman")
   else:
     raise Exception("Must input url, directory path, or file path")
 
-  resultCode = json.dumps(response)
+  resultCode = json.dumps(response, indent=2
+                          )
   print resultCode
 
 

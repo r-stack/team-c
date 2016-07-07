@@ -145,11 +145,11 @@ def decide_reaction(data):
         #それ以外はアニマル
         if "bird" in tags:
             #からす
-            snd = "bird.wav"
+            snd = "Crow2.wav"
         elif "cat" in tags:
-            snd = "cat.wav"
+            snd = "Crow_many.wav"
         else:
-            snd = "beep.wav"
+            snd = "Cannon.wav"
         
     
     return msg, voice, snd

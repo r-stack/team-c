@@ -180,17 +180,17 @@ def decide_reaction(data):
     return msg, voice, snd
 
 def play_message(msg, voice):
-    subprocess.check_output(["bash",
-                             "docomo_tts.sh",
-                                 msg,
-                                 voice])
     try:
         from slacker import Slacker
-        api = Slacker('xoxb-47968952148-Vu0YrAiFM6irSUB0PWvD7H0o')
+        api = Slacker('xoxb-47968952148-lNeZ2FcwqBcdfB5KpBvvzuQO')
         api.chat.post_message("#general", u"%s ;;ue ;;red" % msg, username="Mamorule", as_user=True)
     except:
         print "slack error"
         
+    subprocess.check_output(["bash",
+                             "docomo_tts.sh",
+                                 msg,
+                                 voice])
 
 
 

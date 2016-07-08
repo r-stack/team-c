@@ -58,10 +58,13 @@ def capture_image(outputpath):
 
 def recognize_image(imagepath):
     data = {}
-    #data["item"] = post_docomo_image(imagepath)
-    
+    data["docomo"] = 0
     data["person"], data["pretty"], data["tags"], data["item"]= post_clarifai(imagepath)
-    
+    if post_docomo_image(imagepath) != None:
+        data["item"] = post_docomo_image(imagepath)
+        data["docomo"] = 1
+        a = raw_input("recognized")
+        print data["item"]
     return data
     
 
@@ -109,13 +112,13 @@ def post_clarifai(imagepath):
         #if "bird" in res0_classes or "bottle" in res0_classes:
         if (bottle_probs > 0.15):  
             print "bottle"
-            return False, "pretty" in res0_classes, res0_classes, "bottle"
+            return False, "pretty" in res0_classes, res0_classes, u"おーいお茶"
         elif (crow_probs > 0.15):
             print "crow"
             return False, "pretty" in res0_classes, res0_classes, None
         elif (food_probs > 0.3):
             print "food"
-            return False, "pretty" in res0_classes, res0_classes, "coocke"
+            return False, "pretty" in res0_classes, res0_classes, u"チョコパイ"
         res1 = api.tag(image_file, select_classes="pretty,human,man,woman")
         print json.dumps(res1, indent=2)
         res1_tags = res1.get("results",{})[0].get("result",{}).get("tag",{})
@@ -125,13 +128,14 @@ def post_clarifai(imagepath):
         print "PRETTY VAL=%s" % pretty_val
         
         #data["person"], data["pretty"], data["tags"], data["item"]
-        return True, pretty_val>0.5, res0_classes, None
+        return True, pretty_val>0.1, res0_classes, None
 
 def decide_reaction(data):
     person = data.get("person")
     pretty = data.get("pretty")
     tags = data.get("tags", [])
     item = data.get("item")
+    docomo = data.get("docomo")
     
     msg = None
     snd = None
@@ -140,12 +144,15 @@ def decide_reaction(data):
     print item
     if item:
         #商品として検知されたらゴミ
-        brand = item#item.get("detail", {}).get("brand")
-        if "bottle" in item:
+        if (docomo == 0):
+            brand = item
+        else:
+            brand = item.get("detail", {}).get("brand")
+        if u"おーいお茶" in item:
             # bottle == 資源ごみ
             shohin = brand if brand else u"おーいお茶"
             if state.get("pretty", False):
-                msg = u"本当は火曜日なんだけど、えぇっと、かわいいからOKです"
+                msg = u"%sは美味しいですよね。本当は火曜日なんだけど、えぇっと、かわいいからOKです" % shohin
                 voice = 'seiji'
             else:
                 msg = u"おはようございます。ペットボトルは火曜日に出すようにしてください。"

@@ -104,10 +104,10 @@ def post_clarifai(imagepath):
         print "res0_classes"
         print res0_classes
         #if "bird" in res0_classes or "bottle" in res0_classes:
-        if (bottle_probs > 0.05):  
+        if (bottle_probs > 0.1):  
             print "bottle"
             return False, "pretty" in res0_classes, res0_classes, "bottle"
-        elif (crow_probs > 0.05):
+        elif (crow_probs > 0.1):
             print "crow"
             return False, "pretty" in res0_classes, res0_classes, "bird" 
         res1 = api.tag(image_file, select_classes="pretty,human,man,woman")

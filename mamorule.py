@@ -11,6 +11,7 @@ import sys
 
 from docomocv import DocomoCVClient, Recog
 from clarifai.client import ClarifaiApi
+from Carbon.AppleEvents import cRow
 
 state = {}
 
@@ -56,8 +57,9 @@ def capture_image(outputpath):
 
 def recognize_image(imagepath):
     data = {}
-    data["item"] = post_docomo_image(imagepath)
-    data["person"], data["pretty"], data["tags"]= post_clarifai(imagepath)
+    #data["item"] = post_docomo_image(imagepath)
+    
+    data["person"], data["pretty"], data["tags"], data["item"]= post_clarifai(imagepath)
     
     return data
     
@@ -66,6 +68,7 @@ def post_docomo_image(imagepath):
     print "recognaize syohin(docomo)"
     client = DocomoCVClient("4b4874393877384755546a4a7a5a7575306c55576972496d566866304f414755353537756e524538557337")
     result = client.recognize(imagepath, Recog.food)
+    print "docomo API is here"
     print json.dumps(result, indent=2)
     can = result.get("candidates")
     if can and len(can)>0:
@@ -91,15 +94,23 @@ def post_clarifai(imagepath):
     app_secret = "sY9cM9tyklkhcNv_6gWPs9_ihqv9Amxw5H_1wxiH"
     api = ClarifaiApi(app_id, app_secret)
     with open(imagepath,'rb') as image_file:
-        res0 = api.tag(image_file, select_classes=None)
+        res0 = api.tag(image_file, select_classes="bottle,crow")
         print json.dumps(res0, indent=2)
         
         res0_tags = res0.get("results",{})[0].get("result",{}).get("tag",{})
         res0_classes = res0_tags.get("classes")
-        if "bird" in res0_classes or "bottle" in res0_classes:
-            print "BIRD"
-            return False, "pretty" in res0_classes, res0_classes
-        
+        bottle_probs = res0_tags.get("probs")[0]
+        crow_probs = res0_tags.get("probs")[1]
+       #ship@ofsks
+        print "res0_classes"
+        print res0_classes
+        #if "bird" in res0_classes or "bottle" in res0_classes:
+        if (bottle_probs > 0.05):  
+            print "bottle"
+            return False, "pretty" in res0_classes, res0_classes, "bottle"
+        elif (crow_probs > 0.05):
+            print "crow"
+            return False, "pretty" in res0_classes, res0_classes, "bird" 
         res1 = api.tag(image_file, select_classes="pretty,human,man,woman")
         print json.dumps(res1, indent=2)
         res1_tags = res1.get("results",{})[0].get("result",{}).get("tag",{})
@@ -108,7 +119,8 @@ def post_clarifai(imagepath):
         pretty_val = res1_tags.get("probs")[0]
         print "PRETTY VAL=%s" % pretty_val
         
-        return True, pretty_val>0.1, res0_classes 
+        #data["person"], data["pretty"], data["tags"], data["item"]
+        return True, pretty_val>0.25, res0_classes, None
 
 def decide_reaction(data):
     person = data.get("person")
@@ -119,10 +131,11 @@ def decide_reaction(data):
     msg = None
     snd = None
     voice = "nozomi" #"nozomi"、"seiji"、"akari"、"anzu"、"hiroshi"、"kaho"、 "koutarou"、"maki"、"nanako"、"osamu"、"sumire"
-    
+    print "item is hie"
+    print item
     if item:
         #商品として検知されたらゴミ
-        brand = item.get("detail", {}).get("brand")
+        brand = item#item.get("detail", {}).get("brand")
         if "bottle" in tags:
             # bottle == 資源ごみ
             shohin = brand if brand else u"おーいお茶"

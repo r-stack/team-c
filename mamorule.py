@@ -52,6 +52,8 @@ def capture_image(outputpath):
                                  "1.0"])
     else:
         subprocess.check_output(["fswebcam", outputpath])
+        
+    play_sound("shot.wav")
     return outputpath
 
 def recognize_image(imagepath):
@@ -93,23 +95,27 @@ def post_clarifai(imagepath):
     app_secret = "sY9cM9tyklkhcNv_6gWPs9_ihqv9Amxw5H_1wxiH"
     api = ClarifaiApi(app_id, app_secret)
     with open(imagepath,'rb') as image_file:
-        res0 = api.tag(image_file, select_classes="bottle,crow")
+        res0 = api.tag(image_file, select_classes="bottle,crow,food")
         print json.dumps(res0, indent=2)
         
         res0_tags = res0.get("results",{})[0].get("result",{}).get("tag",{})
         res0_classes = res0_tags.get("classes")
         bottle_probs = res0_tags.get("probs")[0]
         crow_probs = res0_tags.get("probs")[1]
+        food_probs = res0_tags.get("probs")[2]
        #ship@ofsks
-        print "res0_classes"
-        print res0_classes
+        print "food_probs"
+        print food_probs
         #if "bird" in res0_classes or "bottle" in res0_classes:
-        if (bottle_probs > 0.1):  
+        if (bottle_probs > 0.15):  
             print "bottle"
             return False, "pretty" in res0_classes, res0_classes, "bottle"
-        elif (crow_probs > 0.0):
+        elif (crow_probs > 0.15):
             print "crow"
-            return False, "pretty" in res0_classes, res0_classes, "bird" 
+            return False, "pretty" in res0_classes, res0_classes, None
+        elif (food_probs > 0.3):
+            print "food"
+            return False, "pretty" in res0_classes, res0_classes, "coocke"
         res1 = api.tag(image_file, select_classes="pretty,human,man,woman")
         print json.dumps(res1, indent=2)
         res1_tags = res1.get("results",{})[0].get("result",{}).get("tag",{})
@@ -119,7 +125,7 @@ def post_clarifai(imagepath):
         print "PRETTY VAL=%s" % pretty_val
         
         #data["person"], data["pretty"], data["tags"], data["item"]
-        return True, pretty_val>0.25, res0_classes, None
+        return True, pretty_val>0.5, res0_classes, None
 
 def decide_reaction(data):
     person = data.get("person")
@@ -135,7 +141,7 @@ def decide_reaction(data):
     if item:
         #商品として検知されたらゴミ
         brand = item#item.get("detail", {}).get("brand")
-        if "bottle" in tags:
+        if "bottle" in item:
             # bottle == 資源ごみ
             shohin = brand if brand else u"おーいお茶"
             if state.get("pretty", False):

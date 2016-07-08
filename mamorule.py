@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 '''
 Created on 2016/07/07
 
@@ -19,10 +19,8 @@ IS_MAC = platform.system() == 'Darwin'
 
 def main_logic(inputfile=None):
     global state
-    print "recognize_area"
     with open("state.json","r") as f:
         state = json.load(f)
-    print json.dumps(state, indent=2)
     if inputfile:
         imagepath = inputfile
     else:
@@ -60,10 +58,10 @@ def recognize_image(imagepath):
     data = {}
     data["docomo"] = 0
     data["person"], data["pretty"], data["tags"], data["item"]= post_clarifai(imagepath)
-    if post_docomo_image(imagepath) != None:
-        data["item"] = post_docomo_image(imagepath)
-        data["docomo"] = 1
-        print data["item"]
+    #if post_docomo_image(imagepath) != None:
+    #    data["item"] = post_docomo_image(imagepath)
+    #    data["docomo"] = 1
+    #    print data["item"]
     return data
     
 
@@ -98,16 +96,15 @@ def post_clarifai(imagepath):
     api = ClarifaiApi(app_id, app_secret)
     with open(imagepath,'rb') as image_file:
         res0 = api.tag(image_file, select_classes="bottle,crow,food")
-        print json.dumps(res0, indent=2)
+        #print json.dumps(res0, indent=2)
         
         res0_tags = res0.get("results",{})[0].get("result",{}).get("tag",{})
-        res0_classes = res0_tags.get("classes")
+        #res0_classes = res0_tags.get("classes")
         bottle_probs = res0_tags.get("probs")[0]
         crow_probs = res0_tags.get("probs")[1]
         food_probs = res0_tags.get("probs")[2]
-       #ship@ofsks
-        print "food_probs"
-        print food_probs
+        #print "food_probs"
+        #print food_probs
         #if "bird" in res0_classes or "bottle" in res0_classes:
         if (bottle_probs > 0.15):  
             print "bottle"
@@ -118,12 +115,13 @@ def post_clarifai(imagepath):
         elif (food_probs > 0.3):
             print "food"
             return False, "pretty" in res0_classes, res0_classes, u"チョコパイ"
-        res1 = api.tag(image_file, select_classes="pretty,human,man,woman")
+        res1 = api.tag(image_file, select_classes="pretty,smile")
         print json.dumps(res1, indent=2)
         res1_tags = res1.get("results",{})[0].get("result",{}).get("tag",{})
         res1_classes = res1_tags.get("classes")
         # TODO pretty thre
         pretty_val = res1_tags.get("probs")[0]
+	smile_val = res1_tags.get("probs")[1]
         print "PRETTY VAL=%s" % pretty_val
         
         #data["person"], data["pretty"], data["tags"], data["item"]
@@ -166,6 +164,7 @@ def decide_reaction(data):
         if pretty:
             voice = "seiji"
     else:
+	msg = None
         #それ以外はアニマル
         if "bird" in tags:
             #からす
@@ -175,7 +174,10 @@ def decide_reaction(data):
         else:
             snd = "Cannon.wav"
         
-    
+    if smile_val > 0.5:
+	if msg != None:
+		msg = msg + u“今日も笑顔で頑張りましょう。”
+
     return msg, voice, snd
 
 def play_message(msg, voice):
@@ -209,3 +211,4 @@ if __name__ == '__main__':
         inputfile = sys.argv[1]
     
     main_logic(inputfile)
+

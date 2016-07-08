@@ -11,7 +11,6 @@ import sys
 
 from docomocv import DocomoCVClient, Recog
 from clarifai.client import ClarifaiApi
-from Carbon.AppleEvents import cRow
 
 state = {}
 

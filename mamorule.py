@@ -63,7 +63,6 @@ def recognize_image(imagepath):
     if post_docomo_image(imagepath) != None:
         data["item"] = post_docomo_image(imagepath)
         data["docomo"] = 1
-        a = raw_input("recognized")
         print data["item"]
     return data
     

@@ -104,12 +104,12 @@ def post_clarifai(imagepath):
         print "res0_classes"
         print res0_classes
         #if "bird" in res0_classes or "bottle" in res0_classes:
-        if (bottle_probs > 0.1):  
+        if (bottle_probs > 0.15):  
             print "bottle"
             return False, "pretty" in res0_classes, res0_classes, "bottle"
-        elif (crow_probs > 0.1):
+        elif (crow_probs > 0.15):
             print "crow"
-            return False, "pretty" in res0_classes, res0_classes, "bird" 
+            return False, "pretty" in res0_classes, res0_classes, None
         res1 = api.tag(image_file, select_classes="pretty,human,man,woman")
         print json.dumps(res1, indent=2)
         res1_tags = res1.get("results",{})[0].get("result",{}).get("tag",{})
@@ -119,7 +119,7 @@ def post_clarifai(imagepath):
         print "PRETTY VAL=%s" % pretty_val
         
         #data["person"], data["pretty"], data["tags"], data["item"]
-        return True, pretty_val>0.25, res0_classes, None
+        return True, pretty_val>0.5, res0_classes, None
 
 def decide_reaction(data):
     person = data.get("person")

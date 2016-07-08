@@ -52,7 +52,7 @@ def capture_image(outputpath):
                                  "-w",
                                  "1.0"])
     else:
-        subprocess.check_output(["cat", outputpath])
+        subprocess.check_output(["fswebcam", outputpath])
     return outputpath
 
 def recognize_image(imagepath):

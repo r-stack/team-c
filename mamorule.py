@@ -177,6 +177,13 @@ def play_message(msg, voice):
                              "docomo_tts.sh",
                                  msg,
                                  voice])
+    try:
+        from slacker import Slacker
+        api = Slacker('xoxb-47968952148-Vu0YrAiFM6irSUB0PWvD7H0o')
+        api.chat.post_message("#general", u"%s ;;ue ;;red" % msg, username="Mamorule", as_user=True)
+    except:
+        print "slack error"
+        
 
 
 

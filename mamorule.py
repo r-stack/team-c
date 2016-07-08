@@ -127,7 +127,7 @@ def post_clarifai(imagepath):
         print "PRETTY VAL=%s" % pretty_val
         
         #data["person"], data["pretty"], data["tags"], data["item"]
-        return True, pretty_val>0.1, res0_classes, None
+        return True, pretty_val>0.5, res0_classes, None
 
 def decide_reaction(data):
     person = data.get("person")
